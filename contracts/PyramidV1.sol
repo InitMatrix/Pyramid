@@ -138,13 +138,23 @@ contract PyramidV1 is ERC721, Ownable {
     function getRebate(
         address account
     ) public view returns (address[] memory, uint256[] memory) {
-        if (!isNode(account) || isRoot(account)) {
+        if (!isNode(account)) {
+            // console.log("this is not a node", account);
+            address[] memory x = new address[](1);
+            uint256[] memory y = new uint256[](1);
+            x[0] = account;
+            y[0] = 0;
+            return (x, y);
+        }
+        if (isRoot(account)) {
+            // console.log("this is root node", account);
             address[] memory x = new address[](1);
             uint256[] memory y = new uint256[](1);
             x[0] = account;
             y[0] = 1;
             return (x, y);
         } else {
+            // console.log("this is leaf node", account);
             uint256 n = _nodes[account].level;
             // console.log("n=", n);
             address[] memory x = new address[](n);

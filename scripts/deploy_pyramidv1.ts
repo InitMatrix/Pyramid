@@ -7,7 +7,8 @@ async function main() {
 
     await pyramidV1.deployed();
 
-    console.log(`PyramidV1 address:${pyramidV1.address}`);
+    console.log(`PyramidV1 address: ${pyramidV1.address}`);
+    console.log(`PyramidV1 owner: ${(await pyramidV1.owner()).toString()}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

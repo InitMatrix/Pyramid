@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@dlsl/hardhat-gobind": "^1.0.2",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-web3": "^2.0.0",
     "@types/chai": "^4.3.4",
@@ -8,8 +9,7 @@
     "chai": "^4.3.7",
     "hardhat": "^2.13.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.2",
-    "web3": "^1.9.0"
+    "typescript": "^5.0.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",

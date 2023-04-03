@@ -9,7 +9,7 @@ describe("PryamidV1", function () {
 
         const ratios = [10, 20, 30, 40, 50];
         // Contracts are deployed using the first signer/account by default
-        const [owner, A, B, C, D, E, F, G] = await ethers.getSigners();
+        const [owner, A, B, C, D, E, F, G, H] = await ethers.getSigners();
         // const PyramidV1 = await ethers.getContractFactory("PyramidV1");
         // const pyramidv1 = await PyramidV1.deploy("NAME", "SYMBOL", ratios);
         // const Lock = await ethers.getContractFactory("Lock");
@@ -25,18 +25,18 @@ describe("PryamidV1", function () {
         console.log(`E:${E.address}`)
         console.log(`F:${F.address}`)
         console.log(`G:${G.address}`)
-        return { pyramidv1, ratios, owner, A, B, C, D, E, F, G };
+        return { pyramidv1, ratios, owner, A, B, C, D, E, F, G, H };
     }
     describe("Amdin", function () {
         it("owner is right", async function () {
-            const { pyramidv1, ratios, owner, A, B, C, D, E, F, G } = await loadFixture(deploPyramidV1Fixture);
+            const { pyramidv1, ratios, owner, A, B, C, D, E, F, G, H } = await loadFixture(deploPyramidV1Fixture);
             // console.log(`_ratios =${pyramidv1._ratios()}`)
             expect(await pyramidv1.owner()).to.equal(owner.address);
             // expect((await pyramidv1._maxLevel()).toNumber).to.equal(5);
             // expect(await pyramidv1._ratios).to.equal(ratios);
         });
         it("节点测试", async function () {
-            const { pyramidv1, ratios, owner, A, B, C, D, E, F, G } = await loadFixture(deploPyramidV1Fixture);
+            const { pyramidv1, ratios, owner, A, B, C, D, E, F, G, H } = await loadFixture(deploPyramidV1Fixture);
             await pyramidv1.connect(owner).setRatios([1, 2, 3, 4, 5]);
             await pyramidv1.connect(owner).setRoot([A.address, B.address]);
             console.log("set root A,B");
@@ -55,7 +55,7 @@ describe("PryamidV1", function () {
 
             await pyramidv1.connect(G).bind(F.address);
             console.log("bind F->G");
-            const arr = [A, B, C, D, E, F, G];
+            const arr = [A, B, C, D, E, F, G, H];
             for (let index = 0; index < arr.length; index++) {
                 const user = arr[index];
                 var result = await pyramidv1.connect(owner).getRebate(user.address);
