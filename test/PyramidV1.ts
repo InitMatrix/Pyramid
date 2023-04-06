@@ -10,11 +10,9 @@ describe("PryamidV1", function () {
         const ratios = [1, 2, 3, 4, 5];
         // Contracts are deployed using the first signer/account by default
         const [owner, A, B, C, D, E, F, G, H] = await ethers.getSigners();
-        // const PyramidV1 = await ethers.getContractFactory("PyramidV1");
-        // const pyramidv1 = await PyramidV1.deploy("NAME", "SYMBOL", ratios);
-        // const Lock = await ethers.getContractFactory("Lock");
+
         const PyramidV1 = await ethers.getContractFactory("PyramidV1");
-        const pyramidv1 = await PyramidV1.deploy("NAME", "SYMBOL", ratios, false);
+        const pyramidv1 = await PyramidV1.deploy("NAME", "SYMBOL", ratios);
 
         console.log(`部署的PyramidV1合约地址为:${pyramidv1.address}`)
         console.log(`owner地址:${owner.address}`)
