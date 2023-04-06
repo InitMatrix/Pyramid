@@ -3,6 +3,7 @@
     "@dlsl/hardhat-gobind": "^1.0.2",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
     "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@truffle/dashboard-hardhat-plugin": "^0.1.1",
     "@types/chai": "^4.3.4",
     "@types/mocha": "^10.0.1",
     "@types/node": "^18.15.10",
@@ -27,5 +28,13 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InitMatrix/Pyramid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/InitMatrix/Pyramid/issues"
+  },
+  "homepage": "https://github.com/InitMatrix/Pyramid#readme"
 }

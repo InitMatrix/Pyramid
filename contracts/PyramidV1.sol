@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.9;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -9,8 +10,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 contract PyramidV1 is ERC721, Ownable {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdTracker;
+
     struct Node {
-        address from;
+        address parent;
         uint256 tokenId;
         uint level;
     }
@@ -34,12 +36,17 @@ contract PyramidV1 is ERC721, Ownable {
         _ratios = ratios;
         _maxLevel = ratios.length;
         _enableWhite = enableWhite;
-        // console.log("constructor Partner:maxLevel=", _maxLevel);
+        _setRoot(_msgSender());
     }
 
     // 事件:新增节点
-    event CreateNode(address from, address to, uint256 tokenId, uint256 level);
-    event AddWhite(address from, address to);
+    event CreateNode(
+        address parent,
+        address to,
+        uint256 tokenId,
+        uint256 level
+    );
+    event AddWhite(address parent, address to);
 
     /// 设置不同级别分成比例
     /// @param newRatios 新分成比例
@@ -58,37 +65,36 @@ contract PyramidV1 is ERC721, Ownable {
         _enableWhite = enable;
     }
 
-    /// 设置一级代理
+    /// 设置根节点
     /// @param targets 目标地址数组
     function setRoot(address[] memory targets) public onlyOwner {
         for (uint i = 0; i < targets.length; i++) {
-            address to = targets[i];
-            if (
-                to == address(0x0) ||
-                to == _msgSender() ||
-                to == address(this) ||
-                _nodes[to].tokenId != 0
-            ) {
-                continue;
-            }
-            uint256 tokenId = _toMint(to);
-            _createNode(address(this), to, tokenId, 1);
+            address user = targets[i];
+            _setRoot(user);
         }
     }
 
+    function _setRoot(address user) internal {
+        if (user == address(0x0) || isNode(user)) {
+            return;
+        }
+        uint256 tokenId = _toMint(user);
+        _createNode(address(this), user, tokenId, 1);
+    }
+
     /// 构建节点
-    /// @param from_ 前节点
+    /// @param parent_ 前节点
     /// @param to_ 目标节点
     /// @param tokenId_ nft
     /// @param level_ 等级
     function _createNode(
-        address from_,
+        address parent_,
         address to_,
         uint256 tokenId_,
         uint256 level_
     ) private {
-        _nodes[to_] = Node({from: from_, tokenId: tokenId_, level: level_});
-        emit CreateNode(from_, to_, tokenId_, level_);
+        _nodes[to_] = Node({parent: parent_, tokenId: tokenId_, level: level_});
+        emit CreateNode(parent_, to_, tokenId_, level_);
     }
 
     /// 铸造NFT
@@ -104,62 +110,62 @@ contract PyramidV1 is ERC721, Ownable {
     /// @param to 目标地址
     function addWhite(address to) public {
         require(_enableWhite, "admin is not allowed to set the whitelist");
-        require(_nodes[_msgSender()].tokenId != 0, "target node is exist");
+        require(isNode(_msgSender()), "target node is exist");
         require(
             _nodes[_msgSender()].level <= _maxLevel,
-            "front node level >= maxLevel"
+            "parent node level >= maxLevel"
         );
         _whiteList[_msgSender()][to] = true;
         emit AddWhite(_msgSender(), to);
     }
 
     /// 确认绑定等级关系
-    /// @param from 父节点地址
-    function bind(address from) public {
+    /// @param parent 父节点地址
+    function bind(address parent) public {
         // console.log("confirm sender tokenid=", _nodes[_msgSender()].tokenId);
-        require(from != address(0x0), "front node can not be zero");
-        require(from != _msgSender(), "can not confirm itself");
+        require(parent != address(0x0), "parent node can not be zero");
+        require(parent != _msgSender(), "can not confirm itself");
         require(_nodes[_msgSender()].tokenId == 0, "The node already exists");
-        require(_nodes[from].tokenId != 0, "front node not exist");
-        require(_nodes[from].level < _maxLevel, "level overflow");
+        require(_nodes[parent].tokenId != 0, "parent node not exist");
+        require(_nodes[parent].level < _maxLevel, "level overflow");
         require(
-            !_enableWhite || _whiteList[from][_msgSender()],
+            !_enableWhite || _whiteList[parent][_msgSender()],
             "not in white list"
         );
         uint256 tokenId = _toMint(_msgSender());
-        uint256 level = _nodes[from].level + 1;
-        _createNode(from, _msgSender(), tokenId, level);
+        uint256 level = _nodes[parent].level + 1;
+        _createNode(parent, _msgSender(), tokenId, level);
     }
 
     /// 获取目标地址对应的上级地址和权重
-    /// @param account 目标地址
+    /// @param user 目标地址
     /// @return
     /// @return
     function getRebate(
-        address account
+        address user
     ) public view returns (address[] memory, uint256[] memory) {
-        if (!isNode(account)) {
-            // console.log("this is not a node", account);
+        if (!isNode(user)) {
+            // console.log("this is not a node", user);
             address[] memory x = new address[](1);
             uint256[] memory y = new uint256[](1);
-            x[0] = account;
+            x[0] = user;
             y[0] = 0;
             return (x, y);
         }
-        if (isRoot(account)) {
-            // console.log("this is root node", account);
+        if (isRoot(user)) {
+            // console.log("this is root node", user);
             address[] memory x = new address[](1);
             uint256[] memory y = new uint256[](1);
-            x[0] = account;
+            x[0] = user;
             y[0] = 1;
             return (x, y);
         } else {
-            // console.log("this is leaf node", account);
-            uint256 n = _nodes[account].level;
+            // console.log("this is leaf node", user);
+            uint256 n = _nodes[user].level;
             // console.log("n=", n);
             address[] memory x = new address[](n);
             uint256[] memory y = new uint256[](n);
-            address curos = account;
+            address curos = user;
             for (uint i = 0; i < n; i++) {
                 Node memory node = _nodes[curos];
                 uint256 m = node.level;
@@ -168,37 +174,23 @@ contract PyramidV1 is ERC721, Ownable {
                 x[i] = curos;
                 y[i] = _ratios[m - 1];
                 // y[n - i - 1] = _ratios[m - 1];
-                curos = node.from;
+                curos = node.parent;
             }
             return (x, y);
         }
     }
 
-    /// 判断是否为根节点
-    function isRoot() public view returns (bool) {
-        return _nodes[_msgSender()].from == address(this);
-    }
-
     /// 判断是否为根地址
-    /// @param account 目标地址
-    function isRoot(address account) public view returns (bool) {
-        return _nodes[account].from == address(this);
+    /// @param user 目标地址
+    function isRoot(address user) public view returns (bool) {
+        return
+            _nodes[user].tokenId != 0 && _nodes[user].parent == address(this);
     }
 
     /// 判断是否为节点
-    function isNode() public view returns (bool) {
-        return _nodes[_msgSender()].tokenId != 0;
-    }
-
-    /// 判断是否为节点
-    /// @param account 目标地址
-    function isNode(address account) public view returns (bool) {
-        return _nodes[account].tokenId != 0;
-    }
-
-    /// 获取节点信息
-    function getNode() public view returns (Node memory) {
-        return _nodes[_msgSender()];
+    /// @param user 目标地址
+    function isNode(address user) public view returns (bool) {
+        return _nodes[user].tokenId != 0;
     }
 
     /// 获取节点信息
@@ -206,6 +198,10 @@ contract PyramidV1 is ERC721, Ownable {
     function getNode(address user) public view returns (Node memory) {
         // console.log("hahahah");
         return _nodes[user];
+    }
+
+    function parentOf(address user) public view returns (address) {
+        return _nodes[user].parent;
     }
 
     function _transfer(
