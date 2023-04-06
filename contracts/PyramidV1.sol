@@ -79,7 +79,7 @@ contract PyramidV1 is ERC721, Ownable {
             return;
         }
         uint256 tokenId = _toMint(user);
-        _createNode(address(this), user, tokenId, 1);
+        _createNode(address(0x0), user, tokenId, 1);
     }
 
     /// 构建节点
@@ -124,9 +124,10 @@ contract PyramidV1 is ERC721, Ownable {
     function bind(address parent) public {
         // console.log("confirm sender tokenid=", _nodes[_msgSender()].tokenId);
         require(parent != address(0x0), "parent node can not be zero");
-        require(parent != _msgSender(), "can not confirm itself");
-        require(_nodes[_msgSender()].tokenId == 0, "The node already exists");
-        require(_nodes[parent].tokenId != 0, "parent node not exist");
+        require(parent != _msgSender(), "can not bind youself");
+        require(isNode(parent), "parent node is not exist");
+        require(!isNode(_msgSender()), "You're already bound node");
+        require(_nodes[parent].tokenId != 0, "the parent node not exist");
         require(_nodes[parent].level < _maxLevel, "level overflow");
         require(
             !_enableWhite || _whiteList[parent][_msgSender()],
@@ -183,8 +184,7 @@ contract PyramidV1 is ERC721, Ownable {
     /// 判断是否为根地址
     /// @param user 目标地址
     function isRoot(address user) public view returns (bool) {
-        return
-            _nodes[user].tokenId != 0 && _nodes[user].parent == address(this);
+        return _nodes[user].tokenId != 0 && _nodes[user].parent == address(0x0);
     }
 
     /// 判断是否为节点
