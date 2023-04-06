@@ -127,7 +127,6 @@ contract PyramidV1 is ERC721, Ownable {
         require(parent != _msgSender(), "can not bind youself");
         require(isNode(parent), "parent node is not exist");
         require(!isNode(_msgSender()), "You're already bound node");
-        require(_nodes[parent].tokenId != 0, "the parent node not exist");
         require(_nodes[parent].level < _maxLevel, "level overflow");
         require(
             !_enableWhite || _whiteList[parent][_msgSender()],
@@ -170,11 +169,8 @@ contract PyramidV1 is ERC721, Ownable {
             for (uint i = 0; i < n; i++) {
                 Node memory node = _nodes[curos];
                 uint256 m = node.level;
-                // console.log("m=", m);
-
                 x[i] = curos;
                 y[i] = _ratios[m - 1];
-                // y[n - i - 1] = _ratios[m - 1];
                 curos = node.parent;
             }
             return (x, y);
