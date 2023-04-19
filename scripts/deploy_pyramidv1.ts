@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 async function main() {
 
     const PyramidV1 = await ethers.getContractFactory("PyramidV1");
-    const pyramidV1 = await PyramidV1.deploy("Name", "Symbol", [1, 2, 3, 4, 5]);
+    const pyramidV1 = await PyramidV1.deploy("Name", "Symbol", [1, 2, 3]);
 
     await pyramidV1.deployed();
 
