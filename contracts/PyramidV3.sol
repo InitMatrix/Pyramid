@@ -97,17 +97,25 @@ contract PyramidV3 is ERC721, Ownable {
             uint256[] memory x = new uint256[](n);
             uint256[] memory y = new uint256[](n);
             uint256 curos = _users[account];
+            uint256 p = 0;
             for (uint i = 0; i < n; i++) {
                 Node memory node = _nodes[curos];
                 x[i] = curos;
                 y[i] = _ratios[i];
-
+                p = i + 1;
                 if (node.parentId == 0) {
                     break;
                 }
                 curos = node.parentId;
             }
-            return (x, y);
+            uint256[] memory xx = new uint256[](p);
+            uint256[] memory yy = new uint256[](p);
+            for (uint j = 0; j < p; j++) {
+                xx[j] = x[j];
+                yy[j] = y[j];
+            }
+
+            return (xx, yy);
         }
     }
 

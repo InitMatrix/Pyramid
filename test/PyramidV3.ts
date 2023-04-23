@@ -57,6 +57,8 @@ describe("PryamidV3", function () {
             const tokenidD = await pyramidV3.getNFT(D.address);
             console.log(`D绑定B成功 D NFT id=${tokenidD}`);
 
+            await pyramidV3.connect(F).bindParent(tokenidA);
+
             const resultA = await pyramidV3.getRebate(A.address);
             console.log(`result A =${resultA[0]}|| ${resultA[1]}`);
             const resultB = await pyramidV3.getRebate(B.address);
@@ -67,6 +69,7 @@ describe("PryamidV3", function () {
 
             const resultD = await pyramidV3.getRebate(D.address);
             console.log(`result D =${resultD[0]}|| ${resultD[1]}`);
+
 
             // expect(resultA[0]).to.equal(tokenidA);
         });
